@@ -1,0 +1,44 @@
+# GitHub Pages Configuration
+title: "FactorizePhys: Matrix Factorization for Multidimensional Attention in Remote Physiological Sensing"
+description: "NeurIPS 2024 - Novel attention mechanism for remote photoplethysmography using matrix factorization"
+url: "https://physiologicailab.github.io"
+baseurl: "/FactorizePhys"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: minima
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# SEO settings
+author: "PhysiologicAI Lab"
+twitter:
+  username: physiologicai
+  card: summary_large_image
+
+social:
+  name: PhysiologicAI Lab
+  links:
+    - https://github.com/PhysiologicAILab
+
+# Collections
+collections:
+  papers:
+    output: true
+    permalink: /:collection/:name/
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - README.md

@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FactorizePhys: Matrix Factorization for Multidimensional Attention in Remote Physiological Sensing</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        main {
+            margin-top: 80px;
+            padding: 40px 0;
+        }
+
+        .hero {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 60px 40px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .hero .subtitle {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+
+        .authors {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .conference {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .highlights {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .highlight-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            border-left: 5px solid #667eea;
+        }
+
+        .highlight-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .highlight-card i {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .highlight-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .figure-container {
+            text-align: center;
+            margin: 30px 0;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .figure-placeholder {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            border: 2px dashed #adb5bd;
+            border-radius: 10px;
+            padding: 40px;
+            margin: 20px 0;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .architecture-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .fsam-benefits {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .fsam-benefits ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .fsam-benefits li {
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .fsam-benefits li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        footer {
+            background: rgba(44, 62, 80, 0.95);
+            color: white;
+            text-align: center;
+            padding: 40px 0;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .footer-section a {
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .architecture-section {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        .animated {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .animated.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">FactorizePhys</div>
+            <ul class="nav-links">
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#method">Method</a></li>
+                <li><a href="#results">Results</a></li>
+                <li><a href="#impact">Impact</a></li>
+                <li><a href="#code">Code</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="hero animated">
+            <h1>FactorizePhys</h1>
+            <p class="subtitle">Matrix Factorization for Multidimensional Attention in Remote Physiological Sensing</p>
+            
+            <div class="authors">
+                <strong>Jitesh Joshi</strong><sup>1</sup>, <strong>Sos S. Agaian</strong><sup>2</sup>, <strong>Youngjun Cho</strong><sup>1</sup>
+                <br>
+                <sup>1</sup>University College London, UK • <sup>2</sup>City University of New York, USA
+            </div>
+
+            <div class="conference">
+                <i class="fas fa-trophy"></i> NeurIPS 2024
+            </div>
+
+            <div class="buttons">
+                <a href="https://github.com/PhysiologicAILab/FactorizePhys" class="btn">
+                    <i class="fab fa-github"></i> Code
+                </a>
+                <a href="#" class="btn">
+                    <i class="fas fa-file-pdf"></i> Paper
+                </a>
+                <a href="#" class="btn">
+                    <i class="fas fa-database"></i> Dataset
+                </a>
+                <a href="#" class="btn">
+                    <i class="fas fa-play"></i> Demo
+                </a>
+            </div>
+        </section>
+
+        <section id="overview" class="section animated">
+            <h2><i class="fas fa-eye"></i> Overview</h2>
+            <p>FactorizePhys introduces a breakthrough in remote photoplethysmography (rPPG) through the novel <strong>Factorized Self-Attention Module (FSAM)</strong>, which leverages nonnegative matrix factorization to jointly compute multidimensional attention across spatial, temporal, and channel dimensions.</p>
+            
+            <div class="highlights">
+                <div class="highlight-card">
+                    <i class="fas fa-brain"></i>
+                    <h3>Novel Attention Mechanism</h3>
+                    <p>FSAM jointly computes spatial-temporal-channel attention using matrix factorization, unlike existing methods that compute attention disjointly.</p>
+                </div>
+                
+                <div class="highlight-card">
+                    <i class="fas fa-rocket"></i>
+                    <h3>Superior Generalization</h3>
+                    <p>Achieves state-of-the-art cross-dataset performance, demonstrating robust generalization across different rPPG datasets.</p>
+                </div>
+                
+                <div class="highlight-card">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <h3>Computational Efficiency</h3>
+                    <p>Uses an order of magnitude fewer parameters while maintaining competitive latency compared to existing methods.</p>
+                </div>
+                
+                <div class="highlight-card">
+                    <i class="fas fa-cogs"></i>
+                    <h3>Architecture Versatility</h3>
+                    <p>Successfully adapts to both 2D-CNN and 3D-CNN architectures, demonstrating broad applicability.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="method" class="section animated">
+            <h2><i class="fas fa-cog"></i> Method: Factorized Self-Attention Module</h2>
+            
+            <!-- <div class="figure-container">
+                <div class="figure-placeholder">
+                    <strong>Figure 2: FSAM Architecture</strong><br>
+                    Factorized Self-Attention Module illustrated for a 3D-CNN architecture for rPPG estimation
+                    <br><em>Original figure from paper - shows the complete FSAM pipeline with matrix factorization</em>
+                </div>
+            </div> -->
+
+            <div class="figure-container">
+                <img src="/assets/images/paper-figures/FSAM.png" alt="FSAM Architecture" class="paper-figure"
+                    onclick="openFigureModal(1)">
+                <p class="figure-caption"><strong>Figure 2:</strong> FSAM Architecture</p>
+                Factorized Self-Attention Module illustrated for a 3D-CNN architecture for rPPG estimation
+            </div>
+
+            <div class="architecture-section">
+                <div>
+                    <h3>Key Innovation: Matrix Factorization for Attention</h3>
+                    <p>FSAM transforms voxel embeddings into a factorization matrix where:</p>
+                    <ul>
+                        <li><strong>Temporal features</strong> → Vector dimension (M)</li>
+                        <li><strong>Spatial & Channel features</strong> → Feature dimension (N)</li>
+                        <li><strong>Rank-1 factorization</strong> captures the single underlying BVP signal</li>
+                    </ul>
+                    
+                    <div class="code-block">
+V_st ∈ R^(M×N) = φ(ω ∈ R^(τ×ε×θ×ϖ))
+where τ ⟼ M, θ × ϖ × ϱ ⟼ N
+
+V̂_st = Factorize(V_st)  // NMF
+ω̂ = φ^(-1)(V̂_st)       // Attention
+                    </div>
+                </div>
+                
+                <div class="fsam-benefits">
+                    <h3>FSAM Benefits</h3>
+                    <ul>
+                        <li>Joint multidimensional attention computation</li>
+                        <li>No dimension squeezing unlike existing methods</li>
+                        <li>Parts-based representation through non-negativity</li>
+                        <li>Linear computational complexity O(n)</li>
+                        <li>One-step gradient optimization</li>
+                        <li>Retains performance even when dropped during inference</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- <div class="figure-container">
+                <div class="figure-placeholder">
+                    <strong>Figure 3: FactorizePhys Architecture</strong><br>
+                    (A) Proposed FactorizePhys with FSAM; (B) FSAM Adapted for EfficientPhys
+                    <br><em>Shows 3D-CNN architecture and 2D-CNN adaptation</em>
+                </div>
+            </div> -->
+
+            <div class="figure-container">
+                <img src="/assets/images/paper-figures/FactorizePhysFSAMEfficientPhys.png" alt="FactorizePhys Architecture" class="paper-figure"
+                    onclick="openFigureModal(1)">
+                <p class="figure-caption"><strong>Figure 3:</strong> FactorizePhys Architecture</p>
+                (A) Proposed FactorizePhys with FSAM; (B) FSAM Adapted for EfficientPhys
+                <br><em>Shows 3D-CNN architecture and 2D-CNN adaptation</em>
+            </div>
+
+        </section>
+
+        <section id="results" class="section animated">
+            <h2><i class="fas fa-chart-line"></i> Results & Performance</h2>
+            
+            <h3>Cross-Dataset Generalization Performance</h3>
+            <p>FactorizePhys demonstrates superior performance across all evaluation metrics when tested on unseen datasets:</p>
+            
+            <div class="results-grid">
+                <div class="metric-card">
+                    <div class="metric-value">↓67%</div>
+                    <div class="metric-label">MAE Reduction vs. SOTA</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">↑15%</div>
+                    <div class="metric-label">SNR Improvement</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">51K</div>
+                    <div class="metric-label">Parameters (vs. 7.3M SOTA)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">0.998</div>
+                    <div class="metric-label">Correlation (HR)</div>
+                </div>
+            </div>
+
+            <!-- <div class="figure-container">
+                <div class="figure-placeholder">
+                    <strong>Table 2: Cross-dataset Performance Evaluation</strong><br>
+                    Comprehensive comparison showing FactorizePhys outperforming SOTA methods across all datasets
+                    <br><em>Complete results table from paper showing MAE, RMSE, MAPE, Correlation, SNR, and MACC metrics</em>
+                </div>
+            </div> -->
+
+            <div class="figure-container">
+                <img src="/assets/images/paper-figures/cross-dataset-performance.png" alt="Cross-dataset Performance Evaluation"
+                    class="paper-figure" onclick="openFigureModal(1)">
+                <p class="figure-caption"><strong>Table 2:</strong> Cross-dataset Performance Evaluation</p>
+                Comprehensive comparison showing FactorizePhys outperforming SOTA methods across all datasets
+                <br><em>Complete results table from paper showing MAE, RMSE, MAPE, Correlation, SNR, and MACC metrics</em>
+            </div>
+            
+
+            <h3>Computational Efficiency</h3>
+            <!-- <div class="figure-container">
+                <div class="figure-placeholder">
+                    <strong>Figure 4A: Performance vs. Latency</strong><br>
+                    Cumulative cross-dataset performance (MAE) vs. latency plot with model parameters as sphere size
+                    <br><em>Shows FactorizePhys achieving best performance with fewer parameters</em>
+                </div>
+            </div> -->
+
+            <div class="figure-container">
+                <img src="/assets/images/paper-figures/InferenceLatency.png" alt="Performance vs. Latency"
+                    class="paper-figure" onclick="openFigureModal(1)">
+                <p class="figure-caption"><strong>Figure 4A:</strong> Performance vs. Latency</p>
+                Cumulative cross-dataset performance (MAE) vs. latency plot with model parameters as sphere size
+                <br><em>Shows FactorizePhys achieving best performance with fewer parameters</em>
+            </div>
+            
+            <h3>Learned Attention Visualization</h3>
+            <!-- <div class="figure-container">
+                <div class="figure-placeholder">
+                    <strong>Figure 4B: Visualization of Learned Spatial-Temporal Features</strong><br>
+                    Comparison of learned attention between base 3D-CNN and FactorizePhys with FSAM
+                    <br><em>Shows higher cosine similarity and better spatial selectivity with FSAM</em>
+                </div>
+            </div> -->
+
+            <div class="figure-container">
+                <img src="/assets/images/paper-figures/AttentionMaps.png" alt="Visualization of Learned Spatial-Temporal Features" class="paper-figure"
+                    onclick="openFigureModal(1)">
+                <p class="figure-caption"><strong>Figure 4B:</strong> Visualization of Learned Spatial-Temporal Features</p>
+                Comparison of learned attention between base 3D-CNN and FactorizePhys with FSAM
+                <br><em>Shows higher cosine similarity and better spatial selectivity with FSAM</em>
+            </div>
+
+        </section>
+
+        <section id="impact" class="section animated">
+            <h2><i class="fas fa-bullseye"></i> Impact on rPPG Research Community</h2>
+            
+            <div class="highlights">
+                <div class="highlight-card">
+                    <i class="fas fa-globe"></i>
+                    <h3>Enhanced Generalization</h3>
+                    <p>First rPPG method to achieve consistent superior performance across all major datasets (iBVP, PURE, UBFC-rPPG, SCAMPS), addressing the critical challenge of cross-dataset generalization.</p>
+                </div>
+                
+                <div class="highlight-card">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>Real-World Deployment</h3>
+                    <p>Computational efficiency with 15x fewer parameters enables deployment on mobile devices and resource-constrained environments, expanding rPPG accessibility.</p>
+                </div>
+                
+                <div class="highlight-card">
+                    <i class="fas fa-microscope"></i>
+                    <h3>Methodological Breakthrough</h3>
+                    <p>Introduces matrix factorization to attention mechanisms in rPPG, opening new research directions for physiological signal extraction from video.</p>
+                </div>
+                
+                <div class="highlight-card">
+                    <i class="fas fa-hospital"></i>
+                    <h3>Clinical Applications</h3>
+                    <p>Robust performance under challenging conditions (head movement, illumination changes) makes it suitable for clinical and telemedicine applications.</p>
+                </div>
+            </div>
+
+            <h3>Revolutionary Aspects for the Field</h3>
+            <ul>
+                <li><strong>Paradigm Shift:</strong> From disjoint attention computation to joint multidimensional attention</li>
+                <li><strong>Efficiency Revolution:</strong> Proves that fewer parameters can achieve better performance with proper attention design</li>
+                <li><strong>Generalization Breakthrough:</strong> Addresses the long-standing challenge of poor cross-dataset performance in rPPG</li>
+                <li><strong>Architecture Agnostic:</strong> FSAM can be integrated into existing rPPG architectures for immediate performance gains</li>
+            </ul>
+        </section>
+
+        <section id="fsam-versatility" class="section animated">
+            <h2><i class="fas fa-puzzle-piece"></i> FSAM: A Versatile Attention Module</h2>
+            
+            <p>The Factorized Self-Attention Module transcends the specific application of rPPG estimation, offering a novel approach to attention computation that can benefit various computer vision tasks requiring spatial-temporal understanding.</p>
+
+            <div class="architecture-section">
+                <div>
+                    <h3>Cross-Architecture Compatibility</h3>
+                    <ul>
+                        <li><strong>3D-CNN Integration:</strong> Native support for spatial-temporal feature extraction</li>
+                        <li><strong>2D-CNN Adaptation:</strong> Compatible with TSM-based architectures</li>
+                        <li><strong>Transformer Potential:</strong> Can replace traditional multi-head attention</li>
+                        <li><strong>Hybrid Architectures:</strong> Flexible integration with various network designs</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3>Potential Applications Beyond rPPG</h3>
+                    <ul>
+                        <li><strong>Video Understanding:</strong> Action recognition, video classification</li>
+                        <li><strong>Medical Imaging:</strong> Temporal analysis of medical videos</li>
+                        <li><strong>Surveillance:</strong> Behavior analysis and anomaly detection</li>
+                        <li><strong>Sports Analysis:</strong> Motion tracking and performance analysis</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Key Advantages of FSAM</h3>
+            <div class="fsam-benefits">
+                <ul>
+                    <li><strong>No Information Loss:</strong> Unlike squeeze-and-excitation, FSAM preserves all dimensional information</li>
+                    <li><strong>Computational Efficiency:</strong> Linear complexity O(n) compared to quadratic in transformers</li>
+                    <li><strong>Interpretability:</strong> Matrix factorization provides interpretable basis and coefficients</li>
+                    <li><strong>Training Efficiency:</strong> Can be dropped during inference while retaining performance benefits</li>
+                    <li><strong>Scalability:</strong> Tested on different spatial-temporal resolutions</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="code" class="section animated">
+            <h2><i class="fab fa-github"></i> Code & Resources</h2>
+            
+            <div class="highlights">
+                <div class="highlight-card">
+                    <i class="fab fa-github"></i>
+                    <h3>GitHub Repository</h3>
+                    <p>Complete implementation with training scripts, evaluation metrics, and pre-trained models.</p>
+                    <a href="https://github.com/PhysiologicAILab/FactorizePhys" class="btn" style="margin-top: 15px;">
+                        <i class="fab fa-github"></i> View Repository
+                    </a>
+                </div>
+                
+                <div class="highlight-card">
+                    <i class="fas fa-toolbox"></i>
+                    <h3>rPPG-Toolbox Integration</h3>
+                    <p>Built on the comprehensive rPPG-Toolbox framework for fair comparison and reproducible results.</p>
+                </div>
+                
+                <div class="highlight-card">
+                    <i class="fas fa-database"></i>
+                    <h3>Datasets</h3>
+                    <p>Evaluated on iBVP, PURE, UBFC-rPPG, and SCAMPS datasets with standardized preprocessing.</p>
+                </div>
+                
+                <div class="highlight-card">
+                    <i class="fas fa-graduation-cap"></i>
+                    <h3>Reproducible Research</h3>
+                    <p>Complete experimental setup, hyperparameters, and evaluation protocols for reproducible results.</p>
+                </div>
+            </div>
+
+            <h3>Quick Start</h3>
+            <div class="code-block">
+# Clone the repository
+git clone https://github.com/PhysiologicAILab/FactorizePhys.git
+cd FactorizePhys
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Train FactorizePhys with FSAM
+python train.py --model FactorizePhys --attention FSAM --dataset UBFC-rPPG
+
+# Evaluate cross-dataset performance
+python evaluate.py --model FactorizePhys --train_dataset UBFC-rPPG --test_dataset PURE
+            </div>
+        </section>
+
+        <section class="section animated">
+            <h2><i class="fas fa-quote-left"></i> Citation</h2>
+            <div class="code-block">
+@inproceedings{joshi2024factorizephys,
+  title={FactorizePhys: Matrix Factorization for Multidimensional Attention in Remote Physiological Sensing},
+  author={Joshi, Jitesh and Agaian, Sos S. and Cho, Youngjun},
+  booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
+  year={2024}
+}
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Authors</h3>
+                    <p>Jitesh Joshi<br>
+                    Sos S. Agaian<br>
+                    Youngjun Cho</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Affiliations</h3>
+                    <p>University College London<br>
+                    City University of New York</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Resources</h3>
+                    <a href="https://github.com/PhysiologicAILab/FactorizePhys">GitHub Repository</a><br>
+                    <a href="#">Paper (NeurIPS 2024)</a><br>
+                    <a href="#">rPPG-Toolbox</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>PhysiologicAI Lab<br>
+                    University College London</p>
+                </div>
+            </div>
+            <hr style="margin: 20px 0; border-color: #34495e;">
+            <p>&copy; 2024 PhysiologicAI Lab. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Animate elements on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animated').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Add floating animation to highlight cards
+        document.querySelectorAll('.highlight-card').forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        // Add interactive hover effects
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px) scale(1.05)';
+            });
+            
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
