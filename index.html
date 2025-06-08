@@ -665,30 +665,39 @@ V̂_st = Factorize(V_st)  // NMF
 
             <h3>Quick Start</h3>
             <div class="code-block">
-# Clone the repository
-git clone https://github.com/PhysiologicAILab/FactorizePhys.git
-cd FactorizePhys
+                # Clone the repository
 
-# Install dependencies
-pip install -r requirements.txt
+                git clone https://github.com/PhysiologicAILab/FactorizePhys.git
 
-# Train FactorizePhys with FSAM
-python train.py --model FactorizePhys --attention FSAM --dataset UBFC-rPPG
+                cd FactorizePhys
 
-# Evaluate cross-dataset performance
-python evaluate.py --model FactorizePhys --train_dataset UBFC-rPPG --test_dataset PURE
+                # Install dependencies
+                
+                pip install -r requirements.txt
+
+                # Train FactorizePhys with FSAM
+                
+                python train.py --model FactorizePhys --attention FSAM --dataset UBFC-rPPG
+
+                # Evaluate cross-dataset performance
+                
+                python evaluate.py --model FactorizePhys --train_dataset UBFC-rPPG --test_dataset PURE
             </div>
         </section>
 
         <section class="section animated">
             <h2><i class="fas fa-quote-left"></i> Citation</h2>
             <div class="code-block">
-@inproceedings{joshi2024factorizephys,
-  title={FactorizePhys: Matrix Factorization for Multidimensional Attention in Remote Physiological Sensing},
-  author={Joshi, Jitesh and Agaian, Sos S. and Cho, Youngjun},
-  booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
-  year={2024}
-}
+                @inproceedings{joshi2024factorizephys,
+
+                    title={FactorizePhys: Matrix Factorization for Multidimensional Attention in Remote Physiological Sensing},
+                    
+                    author={Joshi, Jitesh and Agaian, Sos S. and Cho, Youngjun},
+                    
+                    booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
+                    
+                    year={2024}
+                }
             </div>
         </section>
     </main>
