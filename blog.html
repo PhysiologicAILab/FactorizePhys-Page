@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Factorization as Attention - FactorizePhys Technical Blog</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header styles */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Main content styles */
+        main {
+            margin-top: 80px;
+            padding: 40px 0;
+        }
+
+        .blog-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+        }
+
+        .blog-header {
+            text-align: center;
+            margin-bottom: 50px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 30px;
+        }
+
+        .blog-title {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .blog-meta {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .blog-tags {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Typography */
+        h1 {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            margin: 40px 0 20px 0;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin: 35px 0 15px 0;
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+        }
+
+        h3 {
+            color: #34495e;
+            font-size: 1.4rem;
+            margin: 25px 0 12px 0;
+        }
+
+        p {
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        /* Math formulas */
+        .math {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+            overflow-x: auto;
+        }
+
+        /* Code blocks */
+        .code-block {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: #ecf0f1;
+            padding: 25px;
+            border-radius: 12px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            margin: 25px 0;
+            overflow-x: auto;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .code-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .code-block .comment {
+            color: #95a5a6;
+            font-style: italic;
+        }
+
+        .code-block .keyword {
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        .code-block .function {
+            color: #e74c3c;
+        }
+
+        /* Figure styles */
+        .figure-container {
+            text-align: center;
+            margin: 40px 0;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .figure-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            margin-bottom: 15px;
+        }
+
+        .figure-caption {
+            font-style: italic;
+            color: #5a6c7d;
+            font-size: 0.95rem;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 30px 0;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 20px 0;
+            padding-left: 30px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* Highlight boxes */
+        .highlight-box {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-left: 5px solid #667eea;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+
+        .highlight-box h3 {
+            color: #667eea;
+            margin-top: 0;
+        }
+
+        /* Key insights */
+        .key-insight {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .key-insight::before {
+            content: "💡";
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: white;
+            padding: 0 10px;
+            font-size: 1.5rem;
+        }
+
+        .key-insight h3 {
+            color: #667eea;
+            margin-top: 0;
+        }
+
+        /* References */
+        .references {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 50px;
+        }
+
+        .references h2 {
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+            margin-bottom: 25px;
+        }
+
+        .references ol {
+            list-style: none;
+            counter-reset: ref-counter;
+        }
+
+        .references li {
+            counter-increment: ref-counter;
+            position: relative;
+            padding-left: 40px;
+            margin-bottom: 15px;
+        }
+
+        .references li::before {
+            content: "[" counter(ref-counter) "]";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* Citation box */
+        .citation-box {
+            background: #2c3e50;
+            color: #ecf0f1;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .blog-container {
+                padding: 30px 20px;
+            }
+
+            .blog-title {
+                font-size: 2rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .code-block {
+                padding: 20px;
+                font-size: 0.9rem;
+            }
+
+            .figure-container {
+                padding: 20px;
+            }
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Table of contents */
+        .toc {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .toc h3 {
+            margin-top: 0;
+            color: #667eea;
+        }
+
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .toc li {
+            margin: 8px 0;
+        }
+
+        .toc a {
+            color: #5a6c7d;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .toc a:hover {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">FactorizePhys Blog</div>
+            <ul class="nav-links">
+                <li><a href="#attention-paradigm">Attention Paradigm</a></li>
+                <li><a href="#fsam-method">FSAM Method</a></li>
+                <li><a href="#mathematical-formulation">Mathematics</a></li>
+                <li><a href="#performance">Performance</a></li>
+                <li><a href="#future-directions">Future Directions</a></li>
+            </ul>
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Main
+            </a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <article class="blog-container">
+            <header class="blog-header">
+                <h1 class="blog-title">Matrix Factorization as Attention: Rethinking Multidimensional Feature Processing in Remote Physiological Sensing</h1>
+                <div class="blog-meta">
+                    <strong>Authors:</strong> Jitesh Joshi, Youngjun Cho<br>
+                    <strong>Published:</strong> June 2, 2025 | <strong>Conference:</strong> NeurIPS 2024
+                </div>
+                <div class="blog-tags">
+                    <span class="tag">Matrix Factorization</span>
+                    <span class="tag">Attention Mechanisms</span>
+                    <span class="tag">Computer Vision</span>
+                    <span class="tag">rPPG</span>
+                    <span class="tag">Deep Learning</span>
+                </div>
+            </header>
+
+            <div class="key-insight">
+                <h3>Key Research Question</h3>
+                <p>At NeurIPS 2024, fellow researchers questioned: <strong>"How can factorization serve as attention?"</strong> This blog post explores the rationale behind matrix factorization-based attention mechanisms and how they differ from cross-attention/transformers.</p>
+            </div>
+
+            <div class="toc">
+                <h3><i class="fas fa-list"></i> Table of Contents</h3>
+                <ul>
+                    <li><a href="#attention-paradigm">The Compression-as-Attention Paradigm</a></li>
+                    <li><a href="#fsam-method">FSAM: Factorized Self-Attention Module</a></li>
+                    <li><a href="#mathematical-formulation">Mathematical Formulation</a></li>
+                    <li><a href="#performance">Why FSAM Outperforms Transformers</a></li>
+                    <li><a href="#inference-advantage">The Inference-Time Advantage</a></li>
+                    <li><a href="#contributions">Key Contributions and Broader Implications</a></li>
+                    <li><a href="#future-directions">Future Research Directions</a></li>
+                </ul>
+            </div>
+
+            <div class="figure-container">
+                <img src="assets/images/paper-figures/FactorizePhysPoster.png" alt="FactorizePhys Poster at NeurIPS 2024">
+                <p class="figure-caption"><strong>Figure 1:</strong> Our poster at NeurIPS 2024, where we discussed FSAM with fellow researchers from the computer vision and machine learning community.</p>
+            </div>
+
+            <section id="attention-paradigm">
+                <h1><i class="fas fa-brain"></i> The Compression-as-Attention Paradigm</h1>
+                
+                <p>Using compression as an attention mechanism isn't new. In the CNN-dominated era, <strong>squeeze-and-excitation (SE) attention</strong> was among the most popular mechanisms. SE attention works by <strong>globally average pooling</strong> across spatial dimensions to compress features into channel descriptors, then using fully connected layers to model channel interdependencies, and finally rescaling the original features.</p>
+
+                <p>However, a fundamental limitation emerges when working with multidimensional feature spaces: <strong>existing attention mechanisms compute attention disjointly across spatial, temporal, and channel dimensions</strong>. For tasks like rPPG estimation that require joint modeling of these dimensions, squeezing individual dimensions can result in information loss, causing learned attention to miss comprehensive multidimensional feature relationships.</p>
+
+                <div class="highlight-box">
+                    <h3>The Core Problem</h3>
+                    <p>Traditional attention mechanisms process spatial, temporal, and channel dimensions separately, leading to information loss in tasks requiring joint multidimensional modeling like remote physiological signal extraction.</p>
+                </div>
+
+                <p>This is precisely the problem our work addresses.</p>
+            </section>
+
+            <section id="fsam-method">
+                <h1><i class="fas fa-cogs"></i> FSAM: Factorized Self-Attention Module</h1>
+
+                <p>FSAM uses <strong>Non-negative Matrix Factorization (NMF)</strong> to factorize multidimensional feature space into a low-rank approximation, serving as a compressed representation that preserves interdependencies across all dimensions. The key advantages are:</p>
+
+                <ol>
+                    <li><strong>Joint multidimensional attention</strong> - No dimension squeezing required; processes spatial, temporal, and channel dimensions simultaneously</li>
+                    <li><strong>Parameter-free optimization</strong> - Uses classic NMF as proposed by Lee & Seung, 1999, with multiplicative updates implemented under 'no_grad' block</li>
+                    <li><strong>Task-specific design</strong> - Tailored for signal extraction tasks with rank-1 factorization</li>
+                </ol>
+
+                <div class="figure-container">
+                    <img src="assets/images/blog/FSAM.png" alt="FSAM Overview">
+                    <p class="figure-caption"><strong>Figure 2:</strong> Overview of the Factorized Self-Attention Module (FSAM) showing how multidimensional voxel embeddings are transformed into a 2D matrix, factorized using NMF, and reconstructed to provide attention weights.</p>
+                </div>
+            </section>
+
+            <section id="mathematical-formulation">
+                <h1><i class="fas fa-calculator"></i> Mathematical Formulation</h1>
+
+                <h2>The Critical Transformation</h2>
+
+                <p>Input spatial-temporal data can be expressed as <strong>I ∈ ℝ<sup>T×C×H×W</sup></strong>, where T, C, H, and W represents total frames (temporal dimension), channels in a frame (e.g., for RGB frames, C=3), height and width of pixels in a frame, respectively. For this input I, we generate voxel embeddings <strong>ε ∈ ℝ<sup>τ×κ×α×β</sup></strong> through 3D feature extraction. The <strong>core innovation</strong> lies in how we reshape these embeddings for factorization.</p>
+
+                <div class="math">
+                    <p><strong>Traditional 2D approach</strong> (like Hamburger module):</p>
+                    <p>V<sup>s</sup> ∈ ℝ<sup>M×N</sup> = Γ<sup>κ→M, α×β→N</sup>(ξ<sub>pre</sub>(ε ∈ ℝ<sup>κ×α×β</sup>))</p>
+                    <p>where κ (channels) → M, α×β (spatial) → N</p>
+                </div>
+
+                <div class="math">
+                    <p><strong>Our 3D spatial-temporal approach</strong>:</p>
+                    <p>V<sup>st</sup> ∈ ℝ<sup>M×N</sup> = Γ<sup>τ→M, κ×α×β→N</sup>(ξ<sub>pre</sub>(ε ∈ ℝ<sup>τ×κ×α×β</sup>))</p>
+                    <p>where τ (temporal) → M, κ×α×β (spatial+channel) → N</p>
+                </div>
+
+                <div class="key-insight">
+                    <h3>Why This Transformation is Crucial for rPPG</h3>
+                    <ul>
+                        <li><strong>Physiological signal correlation:</strong> We need correlations between spatial/channel features and temporal patterns for BVP signal recovery</li>
+                        <li><strong>Single signal source:</strong> Only one underlying BVP signal across facial regions justifies rank-1 factorization (L=1)</li>
+                        <li><strong>Scale considerations:</strong> Temporal and spatial dimensions have vastly different scales</li>
+                    </ul>
+                </div>
+
+                <h2>The NMF Attention Mechanism</h2>
+
+                <p>The factorization process uses iterative multiplicative updates:</p>
+
+                <div class="code-block">
+<span class="keyword">def</span> <span class="function">fsam</span>(E):
+    S = 1
+    rank = 1
+    MD_STEPS = 4
+    ε = 1e-4
+    batch, channel_dim, temporal_dim, alpha, beta = E.shape
+    spatial_dim = alpha × beta
+
+    <span class="comment"># Preprocessing: ensure non-negativity for NMF</span>
+    x = ReLU(Conv3D(E - E.min()))
+
+    <span class="comment"># Transform to factorization matrix</span>
+    V_st = reshape(x, (batch × S, temporal_dim, spatial_dim × channel_dim))
+
+    <span class="comment"># Initialize bases and coefficients</span>
+    bases = torch.ones(batch × S, temporal_dim, rank)
+    coef = softmax(V_st.T @ bases)
+
+    <span class="comment"># Iterative multiplicative updates (4-8 steps)</span>
+    <span class="keyword">for</span> step <span class="keyword">in</span> range(MD_STEPS):
+        <span class="comment"># Update coefficients</span>
+        numerator = V_st.T @ bases
+        denominator = coef @ (bases.T @ bases)
+        coef = coef ⊙ (numerator / (denominator + ε))
+        
+        <span class="comment"># Update bases</span>
+        numerator = V_st @ coef
+        denominator = bases @ (coef.T @ coef)
+        bases = bases ⊙ (numerator / (denominator + ε))
+
+    <span class="comment"># Reconstruct attention</span>
+    V̂_st = bases @ coef.T
+    Ê = reshape(V̂_st, (batch, channel_dim, temporal_dim, alpha, beta))
+
+    <span class="comment"># Apply attention with residual connection</span>
+    output = E + InstanceNorm(E ⊙ ReLU(Conv3D(Ê))) 
+    
+    <span class="keyword">return</span> output
+                </div>
+
+                <h2>Why Rank-1 Factorization Works</h2>
+
+                <p>The paper's ablation studies confirm that <strong>rank-1 factorization performs optimally</strong> for rPPG estimation. This aligns with the physiological assumption that there's a single underlying blood volume pulse signal across different facial regions. Higher ranks (L > 1) showed performance comparable to the baseline without FSAM, indicating rank-1 captures the essential signal structure.</p>
+
+                <div class="figure-container">
+                    <img src="assets/images/paper-figures/rank-ablation.png" alt="Rank Ablation Study">
+                    <p class="figure-caption"><strong>Table 1:</strong> Ablation study results showing performance across different factorization ranks. Rank-1 achieves optimal performance, supporting the single signal source assumption for rPPG estimation.</p>
+                </div>
+            </section>
+
+            <section id="performance">
+                <h1><i class="fas fa-chart-line"></i> Why FSAM Outperforms Transformers</h1>
+
+                <h2>1. Task-Specific vs Generic Design</h2>
+
+                <div class="math">
+                    <p><strong>Transformers</strong> use generic self-attention that treats all positions equally:</p>
+                    <p>Attention(Q,K,V) = softmax(QK<sup>T</sup>/√d<sub>k</sub>)V</p>
+                </div>
+
+                <p><strong>FSAM</strong> is specifically designed for spatial-temporal signal extraction:</p>
+                <ul>
+                    <li><strong>Temporal vectors as the primary dimension</strong> (signals evolve over time, directly supervised through loss function)</li>
+                    <li><strong>Spatial-channel features as descriptors</strong> (different facial regions contribute differently)</li>
+                    <li><strong>Rank-1 constraint</strong> enforces single signal source assumption</li>
+                </ul>
+
+                <h2>2. Computational Efficiency</h2>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Complexity</th>
+                                <th>Parameters</th>
+                                <th>Update Steps</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>FSAM</strong></td>
+                                <td>O(n)</td>
+                                <td>52K</td>
+                                <td>4-8 multiplicative updates</td>
+                            </tr>
+                            <tr>
+                                <td>Transformer</td>
+                                <td>O(n²)</td>
+                                <td>7.38M</td>
+                                <td>Full attention computation</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="highlight-box">
+                    <h3>Efficiency Breakthrough</h3>
+                    <p><strong>138x fewer parameters</strong> compared to PhysFormer while achieving superior performance across all evaluation metrics.</p>
+                </div>
+
+                <h2>3. Superior Cross-Dataset Generalization</h2>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Training → Testing</th>
+                                <th>PhysFormer (MAE↓)</th>
+                                <th>EfficientPhys (MAE↓)</th>
+                                <th><strong>FactorizePhys (MAE↓)</strong></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>iBVP → PURE</td>
+                                <td>6.58 ± 1.98</td>
+                                <td>0.56 ± 0.17</td>
+                                <td><strong>0.60 ± 0.21</strong></td>
+                            </tr>
+                            <tr>
+                                <td>SCAMPS → PURE</td>
+                                <td>16.64 ± 2.95</td>
+                                <td>6.21 ± 2.26</td>
+                                <td><strong>5.43 ± 1.93</strong></td>
+                            </tr>
+                            <tr>
+                                <td>UBFC → PURE</td>
+                                <td>8.90 ± 2.15</td>
+                                <td>4.71 ± 1.79</td>
+                                <td><strong>0.48 ± 0.17</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="key-insight">
+                    <h3>Key Insight</h3>
+                    <p>When trained on synthetic data (SCAMPS) and tested on real data, FactorizePhys shows the smallest performance gap, indicating <strong>superior domain transfer capabilities</strong>.</p>
+                </div>
+
+                <div class="figure-container">
+                    <img src="assets/images/paper-figures/cross-dataset-performance.png" alt="Cross-Dataset Performance">
+                    <p class="figure-caption"><strong>Table 3:</strong> Cross-dataset generalization performance comparison. FactorizePhys consistently outperforms existing state-of-the-art methods, including transformer-based methods across different domain shifts.</p>
+                </div>
+
+                <h2>4. Attention Visualization</h2>
+
+                <p>Our cosine similarity visualization between temporal embeddings and ground-truth PPG signals reveals:</p>
+                <ul>
+                    <li><strong>Higher correlation scores</strong> for FactorizePhys with FSAM</li>
+                    <li><strong>Better spatial selectivity</strong> - correctly identifies skin regions with strong pulse signals</li>
+                </ul>
+
+                <div class="figure-container">
+                    <img src="assets/images/paper-figures/AttentionMaps.png" alt="Attention Visualization">
+                    <p class="figure-caption"><strong>Figure 3:</strong> Attention visualization comparing baseline model (left) and FactorizePhys with FSAM (right). Higher cosine similarity scores (brighter regions) indicate better spatial selectivity for pulse-rich facial regions.</p>
+                </div>
+            </section>
+
+            <section id="inference-advantage">
+                <h1><i class="fas fa-rocket"></i> The Inference-Time Advantage</h1>
+
+                <p>A surprising finding: <strong>FactorizePhys trained with FSAM retains performance even when FSAM is dropped during inference</strong>. This suggests FSAM enhances saliency of relevant features during training, guiding the network to learn such salient feature representations that persist without the attention module.</p>
+
+                <div class="code-block">
+<span class="comment"># Training: FSAM influences 3D convolutional kernels</span>
+factorized_embeddings = fsam(voxel_embeddings)
+loss = compute_loss(head(factorized_embeddings), ground_truth)
+
+<span class="comment"># Inference: Can drop FSAM without performance loss</span>
+output = head(voxel_embeddings)  <span class="comment"># No FSAM needed!</span>
+                </div>
+
+                <p>This dramatically reduces inference latency while maintaining accuracy - ideal for real-time applications.</p>
+
+                <div class="figure-container">
+                    <img src="assets/images/paper-figures/InferenceLatency.png" alt="Inference Time Comparison">
+                    <p class="figure-caption"><strong>Figure 4:</strong> Performance vs. latency comparison showing FactorizePhys achieves superior accuracy with minimal inference time, especially when FSAM is dropped during inference.</p>
+                </div>
+            </section>
+
+            <section id="contributions">
+                <h1><i class="fas fa-star"></i> Key Contributions and Broader Implications</h1>
+
+                <h2>For the rPPG Community</h2>
+                <ul>
+                    <li><strong>First matrix factorization-based attention</strong> specifically designed for physiological signal extraction from facial videos</li>
+                    <li><strong>State-of-the-art cross-dataset generalization</strong> with dramatically fewer parameters</li>
+                    <li><strong>Real-time deployment capability</strong> without performance degradation</li>
+                </ul>
+
+                <h2>For the Broader AI Community</h2>
+                <ul>
+                    <li><strong>Novel attention paradigm</strong> demonstrating that domain-specific designs can outperform generic mechanisms</li>
+                    <li><strong>Efficiency breakthrough:</strong> 138x parameter reduction compared to transformers with superior performance</li>
+                    <li><strong>New perspective on attention in deep learning architectures:</strong> Factorization as compression can be more effective than dimension squeezing</li>
+                </ul>
+
+                <div class="key-insight">
+                    <h3>Paradigm Shift</h3>
+                    <p>The key insight is profound yet simple: <strong>not all tasks require the full complexity of transformer attention</strong>. For spatial-temporal signal extraction tasks, a well-designed, task-specific attention mechanism can achieve superior robustness with dramatically improved efficiency.</p>
+                </div>
+            </section>
+
+            <section id="future-directions">
+                <h1><i class="fas fa-compass"></i> Looking Forward: Future Research Directions</h1>
+
+                <p>FSAM's success opens several promising avenues:</p>
+
+                <ol>
+                    <li><strong>Extended Applications:</strong> Video understanding, action recognition, time-series analysis</li>
+                    <li><strong>Enhanced NMF Variants:</strong> Incorporating temporal smoothness or frequency domain constraints. Check out our subsequent work (<a href="https://arxiv.org/abs/2505.07013" target="_blank">MMRPhys</a>) that explores this direction for robust estimation of multiple physiological signals.</li>
+                    <li><strong>Hybrid Architectures:</strong> Combining factorization-based attention with other mechanisms for different modalities</li>
+                    <li><strong>Theoretical Analysis:</strong> Understanding why rank-1 factorization generalizes so well across datasets</li>
+                </ol>
+
+                <div class="highlight-box">
+                    <h3>Conclusion</h3>
+                    <p>FSAM demonstrates that deeper understanding of the problem domain can lead to more effective solutions than applying generic, computationally expensive methods. In an era of ever-growing model sizes, this work shows that <strong>thoughtful design trumps brute-force scaling</strong>.</p>
+                </div>
+            </section>
+
+            <div class="table-container">
+                <h2><i class="fas fa-database"></i> Code and Data Availability</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Resources</th>
+                            <th>Link</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Paper</strong></td>
+                            <td><a href="https://proceedings.neurips.cc/paper_files/paper/2024/hash/af1c61e4dd59596f033d826419870602-Abstract-Conference.html" target="_blank">FactorizePhys</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Code</strong></td>
+                            <td><a href="https://github.com/PhysiologicAILab/FactorizePhys" target="_blank">GitHub</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dataset</strong></td>
+                            <td><a href="https://github.com/PhysiologicAILab/iBVP-Dataset" target="_blank">iBVP Dataset</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="citation-box">
+                <h2><i class="fas fa-quote-left"></i> Citation</h2>
+@inproceedings{joshi2024factorizephys,
+  author = {Joshi, Jitesh and Agaian, Sos S. and Cho, Youngjun},
+  booktitle = {Advances in Neural Information Processing Systems},
+  editor = {A. Globerson and L. Mackey and D. Belgrave and A. Fan and U. Paquet and J. Tomczak and C. Zhang},
+  pages = {96607--96639},
+  publisher = {Curran Associates, Inc.},
+  title = {FactorizePhys: Matrix Factorization for Multidimensional Attention in Remote Physiological Sensing},
+  url = {https://proceedings.neurips.cc/paper_files/paper/2024/file/af1c61e4dd59596f033d826419870602-Paper-Conference.pdf},
+  volume = {37},
+  year = {2024}
+}
+            </div>
+
+            <div class="references">
+                <h2><i class="fas fa-book"></i> References</h2>
+                <ol>
+                    <li>Joshi, J., Agaian, S. S., & Cho, Y. (2024). FactorizePhys: Matrix Factorization for Multidimensional Attention in Remote Physiological Sensing. In <em>Advances in Neural Information Processing Systems</em> (NeurIPS 2024).</li>
+                    <li>Hu, J., Shen, L., & Sun, G. (2018). Squeeze-and-excitation networks. In <em>Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition</em> (pp. 7132-7141).</li>
+                    <li>Lee, D. D., & Seung, H. S. (1999). Learning the parts of objects by non-negative matrix factorization. <em>Nature</em>, 401(6755), 788-791.</li>
+                    <li>Geng, Z., Guo, M. H., Chen, H., Li, X., Wei, K., & Lin, Z. (2021). Is attention better than matrix decomposition? In <em>International Conference on Learning Representations</em>.</li>
+                    <li>Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., ... & Polosukhin, I. (2017). Attention is all you need. In <em>Advances in Neural Information Processing Systems</em> (pp. 5998-6008).</li>
+                    <li>Yu, Z., Shen, Y., Shi, J., Zhao, H., Torr, P. H., & Zhao, G. (2022). PhysFormer: Facial video-based physiological measurement with temporal difference transformer. In <em>Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition</em> (pp. 4186-4196).</li>
+                </ol>
+            </div>
+
+            <footer style="margin-top: 50px; padding-top: 30px; border-top: 2px solid #e9ecef; text-align: center; color: #7f8c8d;">
+                <p><em>This work was conducted at the Department of Computer Science, University College London, under the supervision of Prof. Youngjun Cho.</em></p>
+                <p><strong>For questions or collaborations:</strong> <a href="mailto:jitesh.joshi.20@ucl.ac.uk">jitesh.joshi.20@ucl.ac.uk</a></p>
+            </footer>
+        </article>
+    </main>
+
+    <script>
+        // MathJax configuration
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+
+        // Smooth scrolling for table of contents
+        document.querySelectorAll('.toc a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Apply animation to sections
+        document.querySelectorAll('section').forEach(section => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(30px)';
+            section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(section);
+        });
+
+        // Copy citation to clipboard
+        document.querySelector('.citation-box').addEventListener('click', function() {
+            const text = this.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                // Show temporary notification
+                const notification = document.createElement('div');
+                notification.textContent = 'Citation copied to clipboard!';
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #28a745;
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    z-index: 10000;
+                    font-weight: 600;
+                `;
+                document.body.appendChild(notification);
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 3000);
+            });
+        });
+    </script>
+</body>
+</html>
