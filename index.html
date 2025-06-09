@@ -478,7 +478,7 @@
                 <strong>Factorized Self-Attention Module (FSAM)</strong>, which leverages nonnegative matrix
                 factorization to jointly compute multidimensional attention across spatial, temporal, and channel
                 dimensions. This work demonstrates that matrix factorization can effectively serve as a multidimensional
-                attention mechanism, outperforming traditional transformer-based approaches for remote physiological
+                attention mechanism, outperforming existing state-of-the-art methods, including transformer-based approaches, for remote physiological
                 sensing.</p>
 
             <div class="figure-container">
@@ -595,13 +595,9 @@
                 <h3>Mathematical Formulation</h3>
 
                 <h4>The Critical Transformation</h4>
-                <p>Input spatial-temporal data can be expressed as $\mathcal{I} \in \mathbb{R}^{T \times C \times H
-                    \times W}$, where $T$, $C$, $H$, and $W$ represent total frames (temporal dimension), channels in a
-                    frame (e.g., for RGB frames, $C=3$), height and width of pixels in a frame, respectively. For this
-                    input $\mathcal{I}$, we generate voxel embeddings $\varepsilon \in \mathbb{R}^{\tau \times \kappa
-                    \times \alpha \times \beta}$ through 3D feature extraction.</p>
+                <p>Input spatial-temporal data can be expressed as <strong>I ∈ ℝ<sup>T×C×H×W</sup></strong>, where T, C, H, and W represents total frames (temporal dimension), channels in a frame (e.g., for RGB frames, C=3), height and width of pixels in a frame, respectively. For this input I, we generate voxel embeddings <strong>ε ∈ ℝ<sup>τ×κ×α×β</sup></strong> through 3D feature extraction.
 
-                <p><strong>Traditional 2D approach</strong> (like Hamburger module [<a href="#ref4">4</a>]):</p>
+                <p><strong>Existing 2D approach</strong> (Hamburger module [<a href="#ref4">4</a>]):</p>
                 <div class="equation-block">
                     $$V^{s} \in \mathbb{R}^{M \times N} = \Gamma^{\kappa\alpha\beta \mapsto MN}(\xi_{pre}(\varepsilon
                     \in \mathbb{R}^{\kappa \times \alpha \times \beta})) \ni \kappa \mapsto M,\alpha \times \beta
@@ -620,7 +616,7 @@
                     <li><strong>Physiological signal correlation</strong>: We need correlations between spatial/channel
                         features and temporal patterns for BVP signal recovery</li>
                     <li><strong>Single signal source</strong>: Only one underlying BVP signal across facial regions
-                        justifies rank-1 factorization ($L=1$)</li>
+                        justifies rank-1 factorization (L=1)</li>
                     <li><strong>Scale considerations</strong>: Temporal and spatial dimensions have vastly different
                         scales</li>
                 </ul>
@@ -733,7 +729,7 @@
             </div>
 
             <div class="key-insight">
-                <h3>Efficiency Breakthrough</h3>
+                <h3>Efficiency Highlight</h3>
                 <p><strong>138× fewer parameters</strong> compared to PhysFormer [<a href="#ref6">6</a>] while achieving
                     superior performance across all evaluation metrics.</p>
             </div>
@@ -744,7 +740,7 @@
 
             <div class="figure-container">
                 <img src="assets/images/paper-figures/cross-dataset-performance.png"
-                    alt="Cross-dataset Performance Evaluation" style="width:70%; height:auto;">
+                    alt="Cross-dataset Performance Evaluation" style="width:75%; height:auto;">
                 <p class="figure-caption"><strong>Table 2:</strong> Cross-dataset Performance Evaluation. Comprehensive
                     comparison showing FactorizePhys outperforming SOTA methods across all datasets with MAE, RMSE,
                     MAPE, Correlation, SNR, and MACC metrics.</p>
@@ -752,27 +748,25 @@
 
             <h3>Performance vs. Latency Analysis</h3>
             <div class="figure-container">
-                <img src="assets/images/paper-figures/InferenceLatency.png" alt="Performance vs. Latency" style="width:70%; height:auto;">
+                <img src="assets/images/paper-figures/InferenceLatency.png" alt="Performance vs. Latency" style="width:50%; height:auto;">
                 <p class="figure-caption"><strong>Figure 4:</strong> Performance vs. Latency. Cumulative cross-dataset
                     performance (MAE) vs. latency plot with model parameters as sphere size, showing FactorizePhys
                     achieving best performance with fewer parameters.</p>
             </div>
 
             <h3>Attention Visualization</h3>
-            <p>Our cosine similarity visualization between temporal embeddings and ground-truth PPG signals reveals
-                higher correlation scores and better spatial selectivity for FactorizePhys with FSAM.</p>
+            <p>In this work, we introduced an intuitive visualization of learned attention features, by computing cosine similarity between temporal embeddings and ground-truth PPG signals. In the below figure, higher correlation scores and better spatial selectivity can be observed for FactorizePhys trained with FSAM.</p>
 
             <div class="figure-container">
                 <img src="assets/images/paper-figures/AttentionMaps.png" alt="Attention Visualization" style="width:80%; height:auto;">
                 <p class="figure-caption"><strong>Figure 5:</strong> Attention visualization comparing baseline model
                     (left) and FactorizePhys with FSAM (right). Higher cosine similarity scores (brighter regions)
-                    indicate better spatial selectivity for pulse-rich facial regions.</p>
+                    indicate better spatial selectivity for rPPG-rich facial regions.</p>
             </div>
 
             <h3>The Inference-Time Advantage</h3>
             <p>A remarkable finding: <strong>FactorizePhys trained with FSAM retains performance even when FSAM is
-                    dropped during inference</strong>. This suggests FSAM acts as a "teacher" during training, guiding
-                the network to learn more salient feature representations that persist without the attention module.</p>
+                    dropped during inference</strong>. This suggests FSAM enhances saliency of relevant features during training, guiding the network to learn such salient feature representations that persist without the attention module.</p>
 
             <div class="code-block">
                 <pre><code><span class="code-comment"># Training: FSAM influences 3D convolutional kernels</span>
@@ -865,7 +859,7 @@ output = head(voxel_embeddings)  <span class="code-comment"># No FSAM needed!</s
                 </div>
             </div>
 
-            <h3>Installation and Quick Start</h3>
+            <!-- <h3>Installation and Quick Start</h3>
             <div class="code-block">
                 <pre><code><span class="code-comment"># Clone the repository</span>
 git clone https://github.com/PhysiologicAILab/FactorizePhys.git
@@ -882,7 +876,7 @@ python evaluate.py --model FactorizePhys --dataset PURE --checkpoint checkpoints
 
 <span class="code-comment"># Run cross-dataset evaluation</span>
 python cross_dataset_eval.py --train_dataset UBFC-rPPG --test_dataset iBVP</code></pre>
-            </div>
+            </div> -->
 
             <div class="table-container">
                 <h3>Code and Data Availability</h3>
@@ -914,9 +908,9 @@ python cross_dataset_eval.py --train_dataset UBFC-rPPG --test_dataset iBVP</code
                                     Dataset</a></td>
                         </tr>
                         <tr>
-                            <td><strong>Follow-up Work</strong></td>
-                            <td>MMRPhys: Multi-modal physiological signal estimation</td>
-                            <td><a href="https://arxiv.org/abs/2505.07013" target="_blank">arXiv:2505.07013</a></td>
+                            <td><strong>SOTA Methods</strong></td>
+                            <td>rPPG-Toolbox: Deep Remote PPG Toolbox (NeurIPS 2023)</td>
+                            <td><a href="https://github.com/ubicomplab/rPPG-Toolbox" target="_blank">rPPG Toolbox</a></td>
                         </tr>
                     </tbody>
                 </table>
